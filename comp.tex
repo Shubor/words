@@ -4,6 +4,7 @@
 \usepackage{amssymb} % allow blackboard bold (aka N,R,Q sets)
 \usepackage{ulem}
 \usepackage{enumitem}
+\usepackage{tikz}
 \setlist{nolistsep}
 \usepackage{multicol}
 \linespread{1.6}  % double spaces lines
@@ -241,7 +242,7 @@
 	\end{itemize}
 \end{multicols}
 
-\setcounter{section}{2} % first section is now 2
+\setcounter{section}{2}
 \hrule
 \section{Aggregate Data Structures}
 \hrule 
@@ -308,7 +309,7 @@
 	\end{itemize}
 \end{multicols}
 
-\setcounter{section}{3} % first section is now 2
+\setcounter{section}{3}
 \hrule
 \section{\texttt{make}}
 \hrule 
@@ -368,6 +369,7 @@
 \hrule 
 
 \begin{multicols}{2}
+\includegraphics[scale=.6]{mem_management.png}
 	\subsection*{Memory areas}
 	\begin{itemize}
 	\item code: program instructions
@@ -375,10 +377,133 @@
 	\item stack: local variables, function arguments, return addresses, temporary storage
 	\item heap: dynamically allocated memory
 	\end{itemize}
+	\subsection*{Stack}
+	\begin{itemize}
+	\item all variables local to a function and function args stored on the stack
+	\item to call func:
+		\begin{enumerate}
+		\item push args to stack
+		\item push return address to stack
+		\item jump to function code
+		\end{enumerate}
+	\item inside function:
+		\begin{enumerate}
+		\item increment the stack pointer to allow space for the local variables
+		\item execute the code
+		\item pop local variables and arguments off the stack 
+		\item push the return result onto the stack
+		\item jump to return address
+		\end{enumerate}
+	\end{itemize}
+	\subsection*{Heap}
+	\begin{itemize}
+	\item accessed under direct control
+	\item request allocation, if there is sufficient contiguous memory available, a pointer is returned to the address of the stage of that memory block
+	\end{itemize}
+	\subsection*{Memory allocation functions}
+	\begin{itemize}
+	\item returns a pointer to void 
+	\item pointer must be cast to a specific type
+	\end{itemize}
+	\subsection*{\texttt{malloc}}
+	\begin{itemize}
+	\item \verb|void *malloc(size_t size)|
+	\item requests number of bytes of memory
+	\end{itemize}
+	\subsection*{\texttt{calloc}}
+	\begin{itemize}
+	\item \verb|void *calloc(size_t num, size_t size)|
+	\item requests number of blocks of memory, and the size of each block
+	\item allocated memory is cleared i.e. set to '0'
+	\end{itemize}
+	\subsection*{\texttt{realloc}}
+	\begin{itemize}
+	\item \verb|void *realloc(void *ptr, size_t size)|
+	\item takes previously allocated memory, and attempts to resize it
+	\item contents are preserved
+	\item may require new block of memory (for contiguous-ness) $\therefore$ new void pointer is returned
+	\end{itemize}
+	\subsection*{\texttt{free}}
+	\begin{itemize}
+	\item \verb|void free(void *ptr)|
+	\item deallocates memory previously allocated 
+	\item \verb|valgrind|: check for leaks
+	\end{itemize}
+	\subsection*{to make program happy}
+	\begin{itemize}
+	\item check memory allocation for success (NULL pointer is returned if unsuccessful)
+	\item don't free memory that has already been freed or was never allocated
+	\end{itemize}
+\end{multicols}
+
+\setcounter{section}{4} % first section is now 2
+\hrule
+\section{Preprocessor}
+\hrule 
+
+\begin{multicols}{2}
+	\begin{itemize}
+	\item \verb|#include "decs.h"| > copying declarations into every file
+	\item useful for externs, tyedefs, struct definitions
+	\end{itemize}
+	\subsection*{Defined symbols}
+	\begin{itemize}
+	\item replace identifier with string, everywhere it appears in the program
+	\item can be any string of characters, $\therefore$ should bracket arithmetic expressions
+	\end{itemize}
+	\subsection*{Macros}
+	\begin{itemize}
+	\item \verb|define min(a,b) ((a) < (b) ? (a) : (b))|
+	\end{itemize}
+	\subsection*{Conditional inclusion}
+	\begin{itemize}
+	\item \verb|#ifdef|, \verb|#ifndef|, \verb|#undef|
+	\item \verb|#if|, \verb|#elif|, \verb|#else|, \verb|#end|
+	\end{itemize}
+	\subsection*{Predefined symbols}
+	\begin{itemize}
+	\item \verb|__LINE__|: current line number at any point
+	\item \verb|__FILE__|: name of current program file
+	\end{itemize}
+	\subsection*{Preprocessor ninjaness}
+	\begin{itemize}
+	\item \verb|gcc -E| runs only preprocessor
+	\item exploit \verb|#define| call by name, and \verb|#ifdef| etc. for conditional generation of hacky templates
+	\end{itemize}
+	
 \end{multicols}
 
 %========================================
 % Lecture 6
+%========================================
+
+\hrule
+\section{Unions and Bitfields}
+\hrule 
+
+\begin{multicols}{2}
+	\subsection*{Unions}
+	\begin{itemize}
+	\item variables that occupy the same space
+	\item \verb|union {| 
+		\\ \hspace*{5mm} \verb|struct {| \\ \hspace*{10mm} \verb|/* struct guts */| \\ \hspace*{5mm} \verb|} type_one;|
+		\\ \hspace*{5mm} \verb|struct {| \\ \hspace*{10mm} \verb|/* struct guts */| \\ \hspace*{5mm} \verb|} type_two;|
+		\\ \verb|} info;|
+	\item access elements: \verb|union_name.part_name|
+	\item don't know which variant of the union is being used, $\therefore$ need to use a separate variable to indicate this
+	\item \verb|struct catalog x;|
+		\\ \verb|switch (x.holding_type) {| 
+			\\ \hspace*{5mm} \verb|case book:| \\ \texttt{\hspace*{10mm} <do stuff> \\ \hspace*{10mm} break;}
+			\\ \hspace*{5mm} \verb|case film:| \\ \texttt{\hspace*{10mm} <do stuff> \\ \hspace*{10mm} break;}
+			\\ \verb|}|
+	\end{itemize}
+	
+% SDNT: bitfields are obvious, can't be bothered writing stuff for it
+
+\end{multicols}
+
+%========================================
+% Lecture 7
 %========================================
 
 \end{document}
