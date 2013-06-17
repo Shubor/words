@@ -123,7 +123,7 @@
 	\end{itemize}
 	\subsection*{UNIX cmds}
 	\begin{itemize}
-	\item \texttt{test}: tests a condition, exists with true/face
+	\item \texttt{test}: tests a condition, exists with true/false
 		\\ \texttt{if test \$1 == "blah"}
 	\item \texttt{sort}: sorts lines of text in a file
 	\item \texttt{cut}: cuts selected parts of lines of text in a file, and sends result to output
@@ -136,6 +136,7 @@
 	\begin{itemize}
 	\item arg enclosed in backquotes indicates that a command is to run, and the output used as the actual argument(s)
 	\item \verb|prog `cat argfile`|
+	% $(command) which is like `command`, but you can nest them correctly: $(command $(command2)) which you can't do with backticks ` `
 	\end{itemize}
 	\subsection*{Subshells}
 	\begin{itemize}
@@ -167,6 +168,7 @@
 	\subsection*{Strange file names}
 	\begin{itemize}
 	\item to open file named \verb|-x|, use \verb|nano ./-x|
+	\item \verb|--| to stop parsing flags \\ \verb|rm -- -x|
 	\end{itemize}
 	% SDNT: For shits and gigs go through web generation example
 \end{multicols}
@@ -190,7 +192,7 @@
 	\item \verb|char msg[] = "message";| \\ \verb|char *string = &msg[0];| (or \verb|msg|)
 		\\ $\therefore$ \verb|msg[1] == *(string+1)|
 	\item Iterating through a string with a pointer
-		\\ \verb|while (*str != '\0') { str++ }|
+		\\ \verb|while (*str != '\0') { str++; }|
 	\end{itemize}
 	\subsection*{Dynamic data structures}
 	\begin{itemize}
@@ -211,7 +213,7 @@
 	\end{itemize}
 	\subsection*{Pointer scalars}
 	\begin{itemize}
-	\item mathematical operations on pointers work regardless of the data type being pointer to
+	\item mathematical operations on pointers work regardless of the data type being pointed to
 	\item ptr accesses to arrays will always move the correct number of bytes
 	\end{itemize}
 	\subsection*{Pass by reference}
@@ -226,7 +228,9 @@
 	\end{itemize}
 	\subsection*{\texttt{void} pointers}
 	\begin{itemize}
-	\item no associated scalar value
+	%\item no associated scalar value
+	\item type signature of the pointer does not specify what it's pointing to
+	% that doesn't mean it doesn't have an "associated scalar value", it just means that the type signature doesn't indicate the type of the value, you can still interpret it as a pointer to any type you like
 	\item can recieve/return ptrs of any type
 	\item \verb|void *malloc(size_t size);|
 	\end{itemize}
@@ -237,8 +241,10 @@
 	\end{itemize}
 	\subsection*{\texttt{NULL} pointers}
 	\begin{itemize}
-	\item pointer with value '0'
-	\item denotes invalid pointer, not a ptr to something at address '0'
+	\item pointer to something at address '0'
+	\item invalid to read or write to that address $\therefore$ god
+	%\item denotes invalid pointer, not a ptr to something at address '0'
+	%it's a pointer to something at address 0, it's just usually invalid to read or write to that address, so it's used as a "sentinel", without ever being dereferenced
 	\end{itemize}
 \end{multicols}
 
@@ -252,7 +258,7 @@
 	\begin{itemize}
 	\item associates name to a value
 	\item maps to an int
-	\item \verb|enum day_name {| \\ \texttt{\hspace*{5mm} sun, mon, tue, wed, thur, fri, sat, sun} \\ \verb|}|
+	\item \verb|enum day_name {| \\ \texttt{\hspace*{5mm} mon, tue, wed, thur, fri, sat, sun} \\ \verb|}|
 		\\ maps to ints 0..7
 	\item can then use \verb|sun++;|
 	\end{itemize}
@@ -261,7 +267,7 @@
 	\item for a collection of data items of different types
 	\item \verb|struct <tag> {|	\\ \texttt{\hspace*{5mm} <member-declarations>} \\ \verb|}|
 	\item declare: \verb|struct <tag> <identifier-list>;|
-	\item access: \verb|<tag>.<element-required>;|
+	\item access: \verb|<identifier>.<element>;|
 	\item if a pointer to a struct is used, \verb|->| operator is used to get an element in a struct
 	\end{itemize}
 \end{multicols}
@@ -443,7 +449,7 @@
 
 \begin{multicols}{2}
 	\begin{itemize}
-	\item \verb|#include "decs.h"| > copying declarations into every file
+	\item \verb|#include "decs.h"| $>$ copying declarations into every file
 	\item useful for externs, tyedefs, struct definitions
 	\end{itemize}
 	\subsection*{Defined symbols}
@@ -789,7 +795,7 @@
 	\subsection*{Passing arguments to thread}
 	\begin{itemize}
 	\item same thread function used for each thread between the different threads
-	\item 1+ arguments: structs! then pass a pointer to struct the struct variable
+	\item 1+ arguments: create struct, then pass a pointer to struct the struct variable
 	\item \verb|pthread_create(&thread_ID, NULL, &func,| \\ \verb|(void*)&multi_arg_struct)|
 	\end{itemize}
 	\subsection*{Thread termination}
@@ -805,7 +811,7 @@
 	\item close files opened by threads
 	\item when \verb|main()| terminates, so do all threads
 	\item \verb|pthread_exit()| can be used to pass on exit status to any thread that will join the existing thread
-	\item value of exit status meant be (void *)
+	\item value of exit status will be (void *)
 	\end{itemize}
 \end{multicols}
 
@@ -912,7 +918,7 @@
 		\end{itemize}
 	\item counting semaphore:
 		\begin{itemize}
-		\item initialised at N > 1
+		\item initialised at N $>$ 1
 		\item allows N threads into critical
 		\end{itemize}
 	\end{itemize}
