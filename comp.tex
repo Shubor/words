@@ -832,7 +832,7 @@
 	\end{itemize}
 	\subsection*{Mutexes}
 	\begin{itemize}
-	\item \verb|pthrea_mutex_t lock =| \\ \verb|PTHREAD_MUTEX_INITIALISER|
+	\item \verb|pthread_mutex_t lock =| \\ \verb|PTHREAD_MUTEX_INITIALISER|
 	\item synchronise access to shared global variables
 	\item entering critical zone: lock mutex \\ \verb|pthread_mutex_lock(&lock);|
 	\item leaving critical: unlock mutex
