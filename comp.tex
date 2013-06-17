@@ -101,7 +101,7 @@
 	\subsection*{Shell variables}
 	\begin{itemize}
 	\item stored in environment of the program
-	\item setting: \verb|VARNAME = value|
+	\item setting: \verb|VARNAME=value|
 	\item using: \verb|$VARNAME|
 	\item script arguments: \verb|$1, $2| etc.
 	\end{itemize}
@@ -436,7 +436,7 @@
 	\end{itemize}
 \end{multicols}
 
-\setcounter{section}{4} % first section is now 2
+\setcounter{section}{4}
 \hrule
 \section{Preprocessor}
 \hrule 
@@ -498,12 +498,693 @@
 			\\ \verb|}|
 	\end{itemize}
 	
-% SDNT: bitfields are obvious, can't be bothered writing stuff for it
+	\subsection*{Bitfields}
+	\begin{itemize}
+	\item can specify the size of bits for each element in a structure
+	\item size placed after field name, with a colon
+	\item \verb|struct IOdev {| \\
+		\texttt{\hspace*{5mm} unsigned RW: 1; \\ \hspace*{5mm} unsigned Dirn: 8; \\
+		\hspace*{5mm} unsigned mode: 3; \\ \hspace*{5mm} unsigned pad: 4;} \\ \verb|}|
+	\item may not be portable:
+		\begin{itemize}
+		\item depends on compiler whether structs are padded
+		\item endianness: whether fields are stored MSB or LSB
+		\end{itemize}
+	\item unpack bitfields from data: 
+		\begin{itemize}
+		\item don't need C bitfield syntax
+		\item shift \verb|<< >>| and logical operators \verb|&| \texttt{ $\sim$ $\wedge$ |}
+		\item \verb|R_W = x >> 15;|
+		\item \verb|Dirn = (x >>7) & 0xFF;|
+		\end{itemize}
+	\end{itemize}
 
+\end{multicols}
+
+\setcounter{section}{5}
+\hrule
+\section{Linked Lists}
+\hrule 
+
+\begin{multicols}{2}
+	%\begin{itemize}
+	%\item dynamic $\therefore$ must allocate memory
+	%\item have pointers to where next element of the list is located
+	%\end{itemize}
+	\subsection*{Internals}
+	\begin{itemize}
+	\item terminated by the NULL pointer
+	\item have pointer to the first element
+	\item don't lose your nodes, that'd be awkward
+	\end{itemize}
+	\subsection*{Characteristics}
+	\begin{itemize}
+	\item altering nth element:
+		\begin{itemize}
+		\item array: O(1)
+		\item linked list: O(n)
+		\end{itemize}
+	%\item flexible structure
+	%\item dynamic
+	\end{itemize}
 \end{multicols}
 
 %========================================
 % Lecture 7
+%========================================
+
+\hrule
+\section{Parallelism}
+\hrule 
+
+\begin{multicols}{2}
+	\subsection*{Origin}
+	\begin{itemize}
+	%\item no more performance gains for sequential 
+	\item require continuous/reasonable performance improvements to support growing architecture
+	\item portability, malleability, maintaining
+	\end{itemize}
+	
+	\subsection*{Moore's Law}
+	\begin{itemize}
+	\item number of transistors that can be placed on a circuit is doubling approximately every 2 years
+	\item bottlenecks: power density, wire delays, DRAM access latency
+	\end{itemize}
+	\subsection*{Hardware/software development}
+	\begin{itemize}
+	\item historically, transistors used to boost performance
+	\item now, more cores per chip, $\therefore$ more, not faster processors
+	\item can't find solution to obtain substantial performance improvement of single core CPUs
+	\item require new parallel architecture
+	\end{itemize}
+	
+	\subsection*{Task parallelism}
+	\begin{itemize}
+	\item processing the task in parallel
+	\item dependencies between tasks - some must be processed before other tasks can occur
+	\item task dependency graph \\ e.g. directed acrylic graph (DAG)
+	\end{itemize}
+	\usetikzlibrary{automata,positioning}
+	\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto]
+	\node[state] (t_1)   {$t_1$};
+	\node[state] (t_2) [below=of t_1] {$t_2$}; 
+	\node[state] (t_3) [below right=of t_1] {$t_3$}; 
+	\node[state] (t_4) [below right=of t_2] {$t_4$}; 
+		\path[->]
+		(t_1) edge (t_2)
+		(t_3) edge (t_4)
+		(t_2) edge (t_4);
+	\end{tikzpicture}
+	
+	\subsection*{Data parallelism}
+	\begin{itemize}
+	\item parallel work on the data of a task
+	\item i.e. performing the same task to different data items at the same time
+	\end{itemize}
+	\subsection*{Task}
+	\begin{itemize}
+	\item computation that consists of a sequence of instructions
+	\item a distinct part of programs/algorithms, as they can be decomposed into tasks
+	\end{itemize}	
+	
+	\subsection*{Dependencies}
+	\begin{itemize}
+	\item execution order between 2 tasks
+	\item no dependencies = maximum parallelism
+	\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto]
+	\node[state] (t_1)   {$t_1$};
+	\node[state] (t_2) [below right=of t_1] {$t_2$}; 
+	\node[state] (t_3) [above right=of t_2] {$t_3$}; 
+	\node[state] (t_4) [below right=of t_3] {$t_4$};
+	\end{tikzpicture}
+	\item dependencies \\
+	\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto]
+	\node[state] (t_1)   {$t_1$};
+	\node[state] (t_2) [below left=of t_1] {$t_2$}; 
+	\node[state] (t_3) [below right=of t_1] {$t_3$}; 
+	\node[state] (t_4) [below=of t_3] {$t_4$};
+		\path[->]
+		(t_1) edge (t_2)
+		(t_1) edge (t_3)
+		(t_2) edge (t_3)
+		(t_3) edge (t_4);	
+	\end{tikzpicture}
+	\item impose partial ordering on tasks
+	\item dependency is transitive
+		\begin{itemize}
+		\item if Ta $\rightarrow$ Tb and Tb $\rightarrow$ Tc, \\then Ta $\rightarrow$ Tc
+		\end{itemize}
+	\end{itemize}
+	
+	\subsection*{Stream programs}
+	\begin{itemize}
+	\item some programs work on streams of data (audio, video etc.)
+	%\item split divides stream, join merges
+	\item used for regular, repeating computations
+	\item pipeline parallelism:
+		\begin{itemize}
+		\item pipeline: sequence of actors
+		\item reads input from upstream data channel, outputs to downstream channel
+		\item producer-consumer relationship (have dependencies)
+		\item stateful actors can be parallelised \\
+		\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto]
+		\node[state] (t_1)  {$t_1$};
+		\node[state] (t_2) [right=of t_1] {$t_2$};
+		\node[state] (t_3) [right=of t_2] {$t_3$};
+		\coordinate[right of=t_3] (d1);
+		\coordinate[left of=t_1] (d2);
+			\path[->]
+			(t_1) edge (t_2)
+			(t_2) edge (t_3);
+			\draw [->] (t_3) to[right] node[auto] {} (d1);
+			\draw [->] (d2) to[right] node[auto] {} (t_1);
+		\end{tikzpicture}
+		\end{itemize}
+	\item task parallelism:
+		\begin{itemize}
+		\item between actors without producer-consumer relationship (no dependencies)
+		\item parallel execution of different tasks
+		\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto]
+		\node[state] (split)  {$split$};
+		\node[state] (t_1) [below left=of split] {$t_1$};
+		\node[state] (t_2) [below right=of split] {$t_2$};
+		\node[state] (join) [below right=of t_1] {$join$};
+		\coordinate[above of=split] (d1);
+		\coordinate[below right of=t_1] (d2);
+		\coordinate[below of=join] (d3);
+			\path[->]
+			(split) edge (t_1)
+			(split) edge (t_2)
+			(t_1) edge (join)
+			(t_2) edge (join);
+			\draw [->] (d1) to[below] node[auto] {} (split);
+			\draw [->] (join) to[below] node[auto] {} (d3);
+		\end{tikzpicture}		
+		\end{itemize}
+	\end{itemize}
+	
+	\newpage	
+	
+	\begin{itemize}
+	\item stream parallelism: \\
+		\begin{itemize}
+		\item for stateless actors (don't remember information between executions)
+		\item parallel execution of the same task on different data items
+		\end{itemize}
+		\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto]
+		\node[state] (split)  {$split$};
+		\node[state] (t_1) [below left=of split] {$t_1$};
+		\node[state] (t_2) [below right=of split] {$t_1$};
+		\node[state] (join) [below right=of t_1] {$join$};
+		\coordinate[above of=split] (d1);
+		\coordinate[below right of=t_1] (d2);
+		\coordinate[below of=join] (d3);
+			\path[->]
+			(split) edge (t_1)
+			(split) edge (t_2)
+			(t_1) edge (join)
+			(t_2) edge (join);
+			\draw [->] (d1) to[below] node[auto] {} (split);
+			\draw [->] (join) to[below] node[auto] {} (d3);
+		\end{tikzpicture}	
+	\end{itemize}
+	
+	\subsection*{Implicit parallelism}
+	\begin{itemize}
+	\item automatic, done by compiler
+	\item speed up is limited
+	\end{itemize}
+	\subsection*{Explicit parallelism}
+	\begin{itemize}
+	\item done by programmer, but they need to understand the program
+	\item decompose it into tasks
+	\item understand hardware to get decomposition that will fit it
+	\item take care of communication/coordination between tasks
+	\end{itemize}
+	
+	\subsection*{Notes}
+	\begin{itemize}
+	\item loops executing in parallel need their own loop index
+	\item SIMD vectorisation (SSE)
+	\item scalar register - a register of a conventional CPU that can only hold one data item at a time
+	\item vector processors have large registers that can hold multiple values of the same data type
+	\item SSE can apply an operation to all elements of a vector at once
+	\end{itemize}
+\end{multicols}
+
+\setcounter{section}{6}
+\hrule
+\section{POSIX Pthreads}
+\hrule 
+
+\begin{multicols}{2}
+	\begin{itemize}
+	\item \verb|<pthread.h>|
+	\item compile: \verb|-lpthread|
+	\item \verb|pthread_t thread_a|
+	\item \verb|pthread_join()|: waits for created threads to terminate, main function is blocked
+	\item \verb|pthread_create()|
+	\end{itemize}
+	\subsection*{Execution indetermination}
+	\begin{itemize}
+	\item no assumptions about execution order can be made about threads executing in parallel
+	\item enforce order via. synchronisation
+	\end{itemize}
+	\subsection*{Thread-safe routine}
+	\begin{itemize}
+	\item function/lib routine/system call is thread safe if it can be called from several threads simultaneously and produce correct results
+	\item \verb|printf()| is safe as output happens atomically
+	\item serialises output
+	\end{itemize}
+	\subsection*{OS schedules threads}
+	\begin{itemize}
+	\item uniprocessor: threads share single processor that will interleave execution of threads
+		\begin{itemize}
+		\item illusion that threads are executing in parallel
+		\end{itemize}
+	\item multicore processor: true parallelism
+		\begin{itemize}
+		\item if num threads > num cores, OS will multiplex between threads
+		\item at any one time, more than one thread is being executed
+		\end{itemize}
+	\end{itemize}
+	\subsection*{Shared address space}
+	\begin{itemize}
+	\item a global passed to thread, is visible in both
+	\end{itemize}
+	\subsection*{Thread creation arguments}
+	\begin{itemize}
+	\item thread ID: variable used to refer back to created thread
+	\item thread attributes: NULL is default
+	\item function: function that thread will execute once created
+	\item args: get passed to function at run-time
+	\item threads are peers, may create other threads, no assumption on execution order
+	\end{itemize}
+	\subsection*{Thread termination arguments}
+	\begin{itemize}
+	\item thread ID: for thread parent is waiting for
+	\item completion status: gets copied unless NULL, where it is ignored
+	\item once joined, thread ID invalid, as thread no longer exists
+	\end{itemize}
+	\subsection*{Passing arguments to thread}
+	\begin{itemize}
+	\item same thread function used for each thread between the different threads
+	\item 1+ arguments: structs! then pass a pointer to struct the struct variable
+	\item \verb|pthread_create(&thread_ID, NULL, &func,| \\ \verb|(void*)&multi_arg_struct)|
+	\end{itemize}
+	\subsection*{Thread termination}
+	\begin{itemize}
+	\item Ways thread can be terminated:
+		\begin{itemize}
+		\item thread returns from start routine
+		\item thread calls \verb|pthread_exit()|
+		\item thread cancelled by another thread
+		\end{itemize}
+	\item when thread destroyed, resources unavailable
+	\item then you gotsta \verb|free()|
+	\item close files opened by threads
+	\item when \verb|main()| terminates, so do all threads
+	\item \verb|pthread_exit()| can be used to pass on exit status to any thread that will join the existing thread
+	\item value of exit status meant be (void *)
+	\end{itemize}
+\end{multicols}
+
+%========================================
+% Lecture 8
+%========================================
+
+\hrule
+\section{Synchronisation}
+\hrule 
+
+\begin{multicols}{2}
+	\subsection*{Mutual exclusion}
+	\begin{itemize}
+	\item serialises access: only one thread must be in the critical section at any time
+	\item race conditions due to interleaved execution of process access to critical section would result in incorrect results
+	\end{itemize}
+	\subsection*{Race conditions}
+	\begin{itemize}
+	\item multiple threads read and write a shared data item, and the final result depends on the relative timing of their execution
+	\item shared resource
+	\item critical section: 2+ code parts that access and manipulate shared data
+	\item prevents mutual exclusion
+	\end{itemize}
+	\subsection*{Mutexes}
+	\begin{itemize}
+	\item \verb|pthrea_mutex_t lock =| \\ \verb|PTHREAD_MUTEX_INITIALISER|
+	\item synchronise access to shared global variables
+	\item entering critical zone: lock mutex \\ \verb|pthread_mutex_lock(&lock);|
+	\item leaving critical: unlock mutex
+	\item initial state: mutex free/unlocked
+	\item calling \verb|lock()| means thread acquires lock 
+	\item while mutex is locked, other threads calling \verb|lock()| are blocked
+	\item blocked threads sit in a queue
+	\item \verb|trylock()| doesn't block threads in a queue if lock isn't free, it'll return immediately
+	\item use return value of \verb|trylock()| distinguishes between the 2 locks
+	\end{itemize}
+	\subsection*{Dynamic creation of mutex}
+	\begin{itemize}
+	\item create mutex at runtime
+	\item \verb|pthread_mutex_init()|: initialise mutex
+	\item \verb|pthread_mutex_destroy()|: atomic bomb
+	\item \verb|free(lock)|
+	\end{itemize}
+	\subsection*{Monitors}
+	\begin{itemize}
+	\item encapsulates access to shared data structures
+	\item hides counter variable from direct access
+	\item only way to access counter is via. function, which already has counter in a mutex
+	\item access via function call is less efficient
+	\end{itemize}
+	\subsection*{Serialisation}
+	\begin{itemize}
+	\item threads execute critical section one after the other
+	\item place computations that don't access shared data outside of critical
+	\end{itemize}
+	\subsection*{Deadlocks}
+	\begin{itemize}
+	\item involves 1+ threads and 1+ resources, such that each thread is waiting for one of the resources, but all resources already held 
+	\item self-deadlock: thread attempts to acquire a mutex it already possesses
+	\item ABBA deadlock: A$\rightarrow$B, B$\rightarrow$A 2 threads attempt to acquire each other's mutexes
+	\item prevent by obtaining multiple mutexes in the same order, unlock operation is immaterial
+	\item conditions necessary for deadlock:
+		\begin{enumerate}
+		\item mutual exclusion: a resource can be assigned to at most one thread
+		\item hold and wait: threads both hold resources and request other resources
+		\item no preemption: a resource can only be released by the thread that holds it
+		\item circular wait: a cycle exists in which each thread waits for a resource that is assigned to another thread
+		\end{enumerate}
+	\end{itemize}
+	\subsection*{Lock contention}
+	\begin{itemize}
+	\item lock in use, but another thread tries to use it
+	\item highly contended lock limits parallelism 
+	\item bottleneck due to serialised activity
+	\item limits scalability (measure of how well a system can be expanded)
+	\end{itemize}
+	\subsection*{Lock granularity}
+	\begin{itemize}
+	\item coarse, medium, fine
+	\item describes amount of data that a lock protects
+	\item coarse $\rightarrow$ fine, if lock contention becomes a problem
+	\item locking/unlocking adds overhead
+	\end{itemize}
+	\subsection*{Barriers}
+	\begin{itemize}
+	\item synchronising point at which a certain number of threads must arrive 
+	\item \verb|pthread_barrier_t|
+	\item participating threads call \verb|pthread_barrier_wait|: all threads block until specified number of threads have called it
+	\item \verb|pthread_barrier_init(&barrier, NULL, 3)|
+	\end{itemize}
+	\subsection*{Semaphores}
+	\begin{itemize}
+	\item non-negative integer synchronisation variables
+	\item works for mutual exclusion and thread synchronisation
+	\item \verb|#include <semaphore.h>|
+	\item P(s): thread must wait until s > 0, then s-- and allowed to continue execution 
+	\item V(s): increment s
+	\item binary semaphores: 
+		\begin{itemize}
+		\item \verb|sem_init(&s, 0, 1)|: 0 = unlocked
+		\item initialised at 1 initially
+		\item behaves like mutex \\ \verb|sem_wait(&s) <critical> sem_post(&s)|
+		\end{itemize}
+	\item counting semaphore:
+		\begin{itemize}
+		\item initialised at N > 1
+		\item allows N threads into critical
+		\end{itemize}
+	\end{itemize}
+	\subsection*{Condition variables}
+	\begin{itemize}
+	\item "spinning": consumes CPU cycles while it circles through loop waiting for something to happen
+	\item waiting: \verb|pthread_cond_wait(condition, mutex)|
+		\begin{itemize}
+		\item blocks thread until signal recieved
+		\item must be called while mutex locked
+		\item releases mutex while it waits, once condition signalled, the mutex is locked again
+		\end{itemize}
+	\item signalling: \verb|pthread_cond_signal(condition)|
+		\begin{itemize}
+		\item wake up at least 1 thread
+		\item must be called after mutex locked, and unlock mutex aftwards
+		\item \verb|pthread_cond_broadcast(condition)|: wakes all threads blocked at condition (bottleneck if there is contention for resources)
+		\end{itemize}
+	\end{itemize}
+	\subsection*{Critique of lock synchronisation}
+	\begin{itemize}
+	\item locks don't compose
+	\item tedious for large systems
+	\item while holding locks, problematic to make calls to unknown code, as called code might acquire locks also
+	\end{itemize}
+	\subsection*{Monitors vs. (semaphores/mutexes)}
+	\begin{itemize}
+	\item semaphore/mutex use voluntary, $\therefore$ can forget to use the s/m associated with a shared data item and introduce a race condition
+	\item deadlock: violation of locking hierarchy
+	\item monitor = shared data + mutual exclusion/sync. mechanism
+	\item safer and more flexible
+	\item assumed behaviour: only one thread can access shared data at any one time
+	\item slightly more inefficient
+	\end{itemize}
+	\subsection*{Problems with thread synchronisation}
+	\begin{itemize}
+	\item deadlocks
+	\item livelocks: two or more threads are busy synchronising and don't make progress
+	\item starvation: one thread never allowed into critical section, $\therefore$ require fairness property to ensure every thread can make progress
+	\end{itemize}
+\end{multicols}
+
+%========================================
+% Lecture 9
+%========================================
+
+\hrule
+\section{Performance}
+\hrule 
+
+\begin{multicols}{2}
+	\subsection*{Limits to performance scalability}
+	\begin{itemize}
+	\item programs have parallel and sequential parts
+	\item sequential: have data dependencies
+	\end{itemize}
+	\subsection*{Amdahl's law}
+	\begin{itemize}
+	\item potential speedup defined by the fraction of the code that can be parallelised
+	\item $speedup = \dfrac{old running time}{new running time} 
+		= \dfrac{1}{(1-p) + \dfrac{p}{n}}$
+	\item sequential part limits scalability
+	\item p: fraction of work that can be parallelised
+	\item n: num threads
+	\item if n $\rightarrow \infty$, speedup = $\dfrac{1}{1-p}$
+	\item p = 0, embarrassingly sequential
+	\item p = 1, embarrassingly parallel
+	\end{itemize}
+	\subsection*{Performance scalability}
+	\begin{itemize}
+	\item linear speedup
+	\item not always achievable due to overhead etc.
+	\item $efficiency = \dfrac{speedup}{n}$
+	\item e = 1, linear speedup
+	\item e > 1, super linear speedup (possible due to registers and cache)
+	\end{itemize}
+	\subsection*{Load balancing}
+	\begin{itemize}
+	\item granularity of parallelism = frequency of interaction between threads
+	\item fine: high communication/synchronisation overhead $\therefore$ less opportunity for performance improvement
+	\item coarse: low communication/synchronisation overheard, harder to load balance effectively
+	\item threads that finish early have to wait for the thread with the largest amount of work to complete
+	\item idle times lower process utilisation
+	\item load imbalance: work unevenly assignment to cores, underutilises parallelism
+	\item assignment of work, not data
+	\item static assignment: more prone to imbalance
+	\item dynamic: quantum of work must be large enough to amortise overhead, allows for solving of load imbalance
+	\end{itemize}
+	\subsection*{Measuring performance}
+	\begin{itemize}
+	\item wallclock time
+	\item \verb|time|: real (elasped), user (time executed in user mode), sys (time executed in kernel mode)
+	\item \verb|gettimeofday()|: measure wallclock time for specific parts of the program
+	\end{itemize}
+	\subsection*{False sharing}
+	\begin{itemize}
+	\item private sum variable $\neq$ private cache line
+	\item force into different cache lines using padded variables
+	\end{itemize}
+	\subsection*{Profiling}
+	\begin{itemize}
+	\item program instrumentation and execution
+	\item CPU provides performance counters to measure various elements
+	\item Heisenberg effect: measuring can perturb a program's execution time
+	\end{itemize}
+	\subsection*{Source of performance loss}
+	\begin{itemize}
+	\item overhead: communication, synchronisation, computation, memory
+	\item non-parallelisable computation
+	\item idle times: lack of work, waiting for external event, load imbalance, memory bound computations
+	\item contention for resources
+	\end{itemize}
+	\subsection*{Performance trade-offs}
+	\begin{itemize}
+	\item communication vs. computation: often possible to reduce communication overhead by performing additional computations
+	\item memory vs. parallelism: increase parallelism can often be increased at cost of increased memory usage (privatisation, padding)
+	\item overhead vs. parallelism: parallelisation overhead, load balance vs. overhead, granularity trade-offs
+	\end{itemize}
+\end{multicols}
+
+\setcounter{section}{8}
+\hrule
+\section{Scalable algorithms}
+\hrule 
+
+\begin{multicols}{2}
+	\subsection*{Recursion}
+	\begin{itemize}
+	\item procedure calls itself to solve a simpler version of problem, terminates at base case
+	\end{itemize}
+	\subsection*{Divide and conquer}
+	\begin{itemize}
+	\item break problem down into subsections, solve recursively, and combine solutions to create solution to the original problem
+	\item mergesort
+	%\item for each dividing step, create 2 pthreads to sort in parallel
+	\end{itemize}
+	\subsection*{Reduction}
+	\begin{itemize}
+	\item Schwartz algorithm: scalable
+	\item reduces a collection of data items to a single, by repeatedly combining the data items pairwise with a binary operator
+	\item op usually associative and commutative
+	\item reduction ops: + *
+	\item reduction of shallow tree contains less computations, not much faster than sequential
+	\item deeper trees = more speed-ups
+	\end{itemize}	
+
+	\subsection*{Fixed parallelisation}
+	\begin{itemize}
+	\item generate until hard coded number of threads, then continues recursively
+	\item more efficient than unlimited, doesn't scale
+	\end{itemize}
+	\subsection*{Scalable parallelisation}
+	\begin{itemize}
+	\item switch to sequential depending on number of cores 
+	\item most efficient
+	\item scales to higher number of cores
+	\item algorithms harder to program for
+	\end{itemize}	
+	\subsection*{Unlimited parallelisation}
+	\begin{itemize}
+	\item generate threads with each dividing step
+	\item highest amount of logical parallelism
+	\item bad nearer base case
+	\end{itemize}
+
+\end{multicols}
+
+%========================================
+% Lecture 10
+%========================================
+
+\hrule
+\section{Pipes and signals}
+\hrule 
+
+\begin{multicols}{2}
+	\subsection*{Process communication}
+	\begin{itemize}
+	\item \verb|exec|: start process
+	\item \verb|fork| $\rightarrow$ \verb|exec|: processes operating in parallel
+	\item pipes and signals: communication
+	\end{itemize}
+	\subsection*{File descriptors}
+	\begin{itemize}
+	\item small integers
+	\item low level I/O to operate on these
+	\item 0: std in
+	\item 1: std out
+	\item 2: std error
+	\end{itemize}
+	\subsection*{Pipe}
+	\begin{itemize}
+	\item \verb|int pipe(int filedes[2])|
+		\begin{itemize}
+		\item 2 elem array of integers
+		\item 0: writing
+		\item 1: reading
+		\end{itemize}
+	\item pipe returns 0 (success), -1 (failure)
+	\item parent to child communication by creating a pipe before fork
+	\item small buffer: when filled the writer is suspended until more data has been read
+	\end{itemize}
+	\subsection*{Signals}
+	\begin{itemize}
+	\item interprocess communication
+	\item form of software interrupt, can be generated by OS
+	\item exec interrupted, function call made to user specified function; exec resumes when function returns
+	\end{itemize}
+	\subsection*{Kill}
+	\begin{itemize}
+	\item send signal to process from cmd line
+	\item some signals can be caught and handled, but some can't (\verb|SIGKILL|)
+	\item \verb|kill -9 12345|
+	\end{itemize}
+	\subsection*{Catching signals}
+	\begin{itemize}
+	\item catch by specifying function to be called once signal is recieved
+	\item \verb|signal(signame, ptr to func)|
+	\item returns a ptr to function that previously caught the signal
+	\end{itemize}
+\end{multicols}
+
+\setcounter{section}{9}
+\hrule
+\section{Processes}
+\hrule 
+
+\begin{multicols}{2}
+	\subsection*{Process initiation}
+	\begin{itemize}
+	\item functions that involve system calls
+	\item set of these functions let you initiate and manage the running of other processes
+	\item shell uses these to start programs corresponding to cmd given
+	\item starting another process: \verb|execl|, \verb|execv| etc.
+	\item after process is started, the main function is called
+	\item \verb|exec|: switches program execution to another
+		\begin{itemize}
+		\item program terminated and main function of other program is called
+		\item no return: exec successful
+		\item -ve return: program not found
+		\item 0+ return: exec function failed
+		\end{itemize}
+	\end{itemize}
+	\subsection*{Parallel execution}
+	\begin{itemize}
+	\item \verb|exec| is like a GOTO: jumps to other program and doesn't return
+	\item forking allows for execution of another program while still continuing execution of current
+	\item \verb|fork|: creates child process that is a copy of the memory image of a parent
+	\item return value of fork function is different for parent and child, by checking this value, running program can determine its identity
+		\begin{itemize}
+		\item 0: child
+		\item PID of child: parent
+		\item -1: in parent process if fork fails
+		\end{itemize}
+	\item parent can ignore or wait for child to exit
+	\end{itemize}
+	\subsection*{\texttt{wait}}
+	\begin{itemize}
+	\item parent can wait until child exists and get the exact value
+	\item waits for a child process to exit \\ \verb|int s = <num>;| \\ \verb|wait(&s);|
+	\item returns the PID of child process
+	\item exit value can be extracted from status value s, other info in value indicates if child failed or was terminated
+	\item \verb|waitpid()|: waits for specific process to exit
+	\end{itemize}
+\end{multicols}
+
+%========================================
+% Lecture 11
+%========================================
+
+%========================================
+% Lecture 12
 %========================================
 
 \end{document}
