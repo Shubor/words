@@ -1,3 +1,7 @@
+%========================================
+% Comp2129
+%========================================
+
 \documentclass[10pt, multicolumn, a4paper]{article}
 
 \usepackage{amsmath} % just math
@@ -17,6 +21,9 @@
 %\begin{flushright}
 %Comp2129
 %\end{flushright}
+
+% http://linux.die.net/man/2/getrusage
+% get a process's resource usage, such as elapsed time, from inside the process
 
 %========================================
 % Lecture 2
@@ -908,7 +915,7 @@
 	\item non-negative integer synchronisation variables
 	\item works for mutual exclusion and thread synchronisation
 	\item \verb|#include <semaphore.h>|
-	\item P(s): thread must wait until s > 0, then s-- and allowed to continue execution 
+	\item P(s): thread must wait until s $>$ 0, then \verb|s--| and allowed to continue execution 
 	\item V(s): increment s
 	\item binary semaphores: 
 		\begin{itemize}
@@ -993,7 +1000,7 @@
 	\item not always achievable due to overhead etc.
 	\item $efficiency = \dfrac{speedup}{n}$
 	\item e = 1, linear speedup
-	\item e > 1, super linear speedup (possible due to registers and cache)
+	\item e $>$ 1, super linear speedup (possible due to registers and cache)
 	\end{itemize}
 	\subsection*{Load balancing}
 	\begin{itemize}
@@ -1178,7 +1185,7 @@
 	\subsection*{\texttt{wait}}
 	\begin{itemize}
 	\item parent can wait until child exists and get the exact value
-	\item waits for a child process to exit \\ \verb|int s = <num>;| \\ \verb|wait(&s);|
+	\item waits for a child process to exit \\ \verb|int s = 0;| \\ \verb|wait(&s);|
 	\item returns the PID of child process
 	\item exit value can be extracted from status value s, other info in value indicates if child failed or was terminated
 	\item \verb|waitpid()|: waits for specific process to exit
