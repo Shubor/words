@@ -11,8 +11,30 @@
 \usepackage{tikz}
 \setlist{nolistsep}
 \usepackage{multicol}
-\linespread{1.6}  % double spaces lines
-\usepackage[left=1in,top=1in,right=1in,bottom=1in,nohead]{geometry}
+\usepackage[left=2cm,top=1cm,right=2cm,nohead,nofoot]{geometry}
+
+\iffalse
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topskip}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\topsep}{0pt}
+\setlength{\partopsep}{0pt}
+\linespread{0.5}
+
+\usepackage[compact]{titlesec}
+\titlespacing{\section}{0pt}{*0}{*0}
+\titlespacing{\subsection}{0pt}{*0}{*0}
+\titlespacing{\subsubsection}{0pt}{*0}{*0}
+\fi
+
+\newcommand{\lecture}[1]
+{
+	\hrule
+	\section{#1}
+	\hrule
+}
 
 \begin{document}
 
@@ -20,8 +42,114 @@
 \small \normalsize %% dumb, but have to do this for the prev to work
 
 %========================================
+% Lecture 1
 %========================================
 
+\lecture{Introduction to DB Management Systems}
+
+\begin{multicols}{2}
+
+\iffalse % --------- Outline ----------------
+	File Systems vs. DBMS
+	Overview of Core Database Functionalities
+		- Data Independence
+		- Declarative Querying
+		- Transactions
+	Metadata
+\fi % ------------------------------------
+	
+	\subsection*{Database}
+	\begin{itemize}
+	\item collection of data
+	\item persistent
+	\item shared: qualified users have access to the same data
+	\end{itemize}
+	
+	\subsection*{DB Management System}
+	\begin{itemize}
+	\item data independence
+	\item declarative querying
+	\item transaction management and concurrency control 
+	\end{itemize}
+
+	\subsection*{File System vs. DBMS}
+	\begin{itemize}
+	\item data storage
+		\begin{itemize}
+		\item FS: repeat data definitions 
+		\item DBMS: keeps metadata about its content and state
+		\end{itemize}
+	\item data access
+		\begin{itemize}
+		\item FS: program repeatedly
+		\item DBMS: declarative queries
+		\end{itemize}
+	\end{itemize}
+
+\end{multicols}
+
+%========================================
+% Lecture 2
+%========================================
+
+\lecture{Conceptual Database Design: The Relational Model}
+
+\begin{multicols}{2}
+
+\iffalse % --------- Outline ----------------
+	Conceptual Database Design using the:
+		- Entity Relationship Model
+		- Database Design with UML
+\fi % ------------------------------------
+
+	\subsection*{Entity Relationship Model}
+	\begin{itemize}
+	\item data model that depicts associations between different categories of data
+	\item can be converted into a relational schema
+	\end{itemize}
+
+\end{multicols}
+
+%========================================
+% Lecture 3
+%========================================
+
+\iffalse
+\lecture{}
+
+\iffalse % --------- Outline ----------------
+	
+\fi % ------------------------------------
+
+\begin{multicols}{2}
+
+\end{multicols}
+\fi
+
+%========================================
+% Definitions
+%========================================
+
+\hrule
+\section*{Definitions} 
+\hrule
+
+\begin{multicols}{2}
+	
+	\begin{description}
+	\item[data] stored representation of raw facts
+	\item[information] processed data
+	\item[metadata] data that describes data
+	\item[relational Database] collection of tables of particular `types', each of which store data as rows with multiple attributes
+	\iffalse
+	\item[data model] concepts for describing data: structure, operations and constraints
+	\item[schema] a description of a particular data collection at abstraction level using given model
+	\item[relational data model] a relation is a table with rows and columns; described by a schema
+	\fi
+	\end{description}
+
+	
+\end{multicols}
 
 %========================================
 %========================================
